@@ -6,11 +6,7 @@
 #pragma clang diagnostic ignored "-WDocumentation"
 #define GLEW_STATIC
 #include <glew.h>
-//#include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <string>
-#include <iostream>
-#include <fstream>
 #include <cmath>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -31,7 +27,7 @@ GLuint vbo[numVBOs];
 GLuint mvLoc, projLoc;
 int width, height;
 float aspect;
-glm::mat4 pMat, vMat, mMat, mvMat;
+glm::mat4 pMat, vMat, mMat, mvMat, tMat, rMat;
 
 void setupVertices() { // 36 vertices, 12 triangles, makes 2x2x2 cube placed at origin
     float vertexPositions[108] = {
@@ -54,7 +50,6 @@ void setupVertices() { // 36 vertices, 12 triangles, makes 2x2x2 cube placed at 
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
-
 }
 
 GLuint createShaderProgram() {
@@ -106,6 +101,7 @@ void init(GLFWwindow* window) {
 void display(GLFWwindow* window, double currentTime) {
     // background
     glClear(GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(renderingProgram);
 
     // get the uniform variables for the MV and project matrices
@@ -119,7 +115,14 @@ void display(GLFWwindow* window, double currentTime) {
 
     // build view matrix, model matrix, and model-view matrix
     vMat = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
-    mMat = glm::translate(glm::mat4(1.0f), glm::vec3(cubeLocX, cubeLocY, cubeLocZ));
+    // use current time to compute different translations in x, y, z
+    tMat = glm::translate(glm::mat4(1.0f),glm::vec3(sin(0.35f*currentTime)*2.0f,
+                                                    cos(0.52f*currentTime)*2.0f,
+                          sin(0.7f*currentTime)*2.0f));
+    rMat = glm::rotate(glm::mat4(1.0f), 1.75f*(float)currentTime, glm::vec3(0.0f, 1.0f, 0.0f));
+    rMat = glm::rotate(rMat, 1.75f*(float)currentTime,glm::vec3(1.0f, 0.0f, 0.0f));
+    rMat = glm::rotate(rMat, 1.75f*(float)currentTime, glm::vec3(0.0f, 0.0f, 1.0f));
+    mMat = tMat * rMat;
     mvMat = vMat * mMat;
 
     // copy perspective and MV matrices to corresponding uniform variables
