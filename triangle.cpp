@@ -6,7 +6,7 @@
 #include <string>
 #include <iostream>
 
-using namespace std;
+using namespace utils;
 
 #define numVAOs 1
 
