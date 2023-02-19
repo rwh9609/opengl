@@ -83,7 +83,7 @@ bool Utils::checkOpenGLError() {
     return foundError;
 }
 
-glm::mat4 Utils::buildTranslate(float x, float y, float z) {
+glm::mat4 buildTranslate(float x, float y, float z) {
     glm::mat4 trans = glm::mat4(1.0, 0.0, 0.0, 0.0,
                                 0.0, 1.0, 0.0, 0.0,
                                 0.0, 0.0, 1.0, 0.0,
@@ -91,7 +91,7 @@ glm::mat4 Utils::buildTranslate(float x, float y, float z) {
     return trans;
 }
 
-glm::mat4 Utils::buildScale(float x, float y, float z) {
+glm::mat4 buildScale(float x, float y, float z) {
     glm::mat4 scale = glm::mat4(x, 0.0, 0.0, 0.0,
                                 0.0, y, 0.0, 0.0,
                                 0.0, 0.0, z, 0.0,
@@ -99,7 +99,7 @@ glm::mat4 Utils::buildScale(float x, float y, float z) {
     return scale;
 }
 
-glm::mat4 Utils::rotateX(float rad) {
+glm::mat4 rotateX(float rad) {
     glm::mat4 xrot = glm::mat4(1.0, 0.0, 0.0, 0.0,
                                0.0, cos(rad), -sin(rad), 0.0,
                                0.0, sin(rad), cos(rad), 0.0,
@@ -107,7 +107,7 @@ glm::mat4 Utils::rotateX(float rad) {
     return xrot;
 }
 
-glm::mat4 Utils::rotateY(float rad) {
+glm::mat4 rotateY(float rad) {
     glm::mat4 yrot = glm::mat4(cos(rad), 0.0, sin(rad), 0.0,
                                0.0, 1.0, 0.0, 0.0,
                                -sin(rad), 0.0, cos(rad), 0.0,
@@ -115,7 +115,7 @@ glm::mat4 Utils::rotateY(float rad) {
     return yrot;
 }
 
-glm::mat4 Utils::rotateZ(float rad) {
+glm::mat4 rotateZ(float rad) {
     glm::mat4 zrot = glm::mat4(cos(rad), -sin(rad), 0.0, 0.0,
                                sin(rad), cos(rad), 0.0, 0.0,
                                0.0, 0.0, 1.0, 0.0,

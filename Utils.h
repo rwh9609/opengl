@@ -22,18 +22,18 @@ namespace utils {
         static void printProgramLog(int prog);
 
         static bool checkOpenGLError();
-
-        static glm::mat4 buildTranslate(float x, float y, float z);
-
-        static glm::mat4 buildScale(float x, float y, float z);
-
-        static glm::mat4 rotateX(float rad);
-
-        static glm::mat4 rotateY(float rad);
-
-        static glm::mat4 rotateZ(float rad);
     };
 
 } // utils
+
+static glm::mat4 buildTranslate(float x, float y, float z);
+
+static glm::mat4 buildScale(float x, float y, float z);
+
+static glm::mat4 rotateX(float rad);
+
+static glm::mat4 rotateY(float rad);
+
+static glm::mat4 rotateZ(float rad);
 
 #endif //GRAPHICS3_UTILS_H
