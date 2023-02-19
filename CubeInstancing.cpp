@@ -107,7 +107,7 @@ GLuint createShaderProgram() {
 
 void init(GLFWwindow* window) {
     renderingProgram = createShaderProgram();
-    cameraX = 0.0f; cameraY = 0.0f; cameraZ = 600.0f;
+    cameraX = 0.0f; cameraY = 0.0f; cameraZ = 25.0f;
     cubeLocX = 0.0f; cubeLocY = 0.0f; cubeLocZ = 0.0f; // shift down Y to reveal perspective;
     setupVertices();
 }
