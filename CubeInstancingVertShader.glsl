@@ -11,13 +11,13 @@ mat4 buildTranslate(float x, float y, float z);
 void main(void)
 {
     float i = gl_InstanceID + tf;
-    float a = sin(203.0 * i/8000) * 403.0f;
+    float a = sin(201.0 * i/8000) * 403.0f;
     float b = sin(301.0 * i/8000) * 401.0f;
     float c = sin(400.0 * i/8000) * 405.0f;
 
-    mat4 localRotX = rotateX(i);
-    mat4 localRotY = rotateX(i);
-    mat4 localRotZ = rotateX(i);
+    mat4 localRotX = rotateX(i*.1);
+    mat4 localRotY = rotateX(i*.1);
+    mat4 localRotZ = rotateX(i*.1);
     mat4 localTrans = buildTranslate(a,b,c);
 
     mat4 newM_matrix = localTrans * localRotX * localRotY * localRotZ;
