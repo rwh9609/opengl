@@ -11,6 +11,7 @@ set(GRAPHICS3_UTILS_SRC Utils.cpp)
 
 add_executable(triangle triangle.cpp)
 add_executable(cube cube.cpp)
+add_executable(tempCube tempCube.cpp)
 add_executable(cube_refactored CubeRefactored.cpp Utils.h Utils.cpp CubeRefactoredFragShader.glsl CubeRefactoredVertShader.glsl)
 add_executable(cube_instancing CubeInstancing.cpp Utils.h Utils.cpp CubeInstancingFragShader.glsl CubeInstancingVertShader.glsl)
 
@@ -33,6 +34,10 @@ target_link_libraries(triangle GLEW::GLEW)
 target_link_libraries(cube ${OPENGL_LIBRARIES} glfw)
 target_link_libraries(cube ${SOIL})
 target_link_libraries(cube GLEW::GLEW)
+
+target_link_libraries(tempCube ${OPENGL_LIBRARIES} glfw)
+target_link_libraries(tempCube ${SOIL})
+target_link_libraries(tempCube GLEW::GLEW)
 
 target_link_libraries(cube_refactored ${OPENGL_LIBRARIES} glfw)
 target_link_libraries(cube_refactored ${SOIL})
