@@ -25,6 +25,7 @@ using namespace utils;
 
 float cameraX, cameraY, cameraZ;
 float cubeLocX, cubeLocY, cubeLocZ;
+float pyrLocX, pyrLocY, pyrLocZ;
 GLuint  renderingProgram;
 GLuint vao[numVAOs];
 GLuint vbo[numVBOs];
@@ -35,8 +36,9 @@ int width, height;
 float aspect;
 glm::mat4 pMat, vMat, mMat, mvMat, tMat, rMat;
 
-void setupVertices() { // 36 vertices, 12 triangles, makes 2x2x2 cube placed at origin
-    float vertexPositions[108] = {
+void setupVertices() {
+    // 36 vertices, 12 triangles, makes 2x2x2 cube placed at origin
+    float cubePositions[108] = {
             -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f,
             1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f,
             1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f,
@@ -50,12 +52,25 @@ void setupVertices() { // 36 vertices, 12 triangles, makes 2x2x2 cube placed at 
             -1.0f,1.0f,-1.0f,1.0f,1.0f,-1.0f,1.0f,1.0f,1.0f,
             1.0f,1.0f,1.0f,-1.0f,1.0f,1.0f,-1.0f,1.0f,-1.0f
     };
-    glGenVertexArrays(1, vao);
+
+    // pyramid with 18 vertices, comprising 6 triangles (four sides, and two on the bottom)
+    float pyramidPositions[54] = {
+        -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, // front face
+        1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // right face
+        1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // back face
+        -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, 0.0f, 1.0f, 0.0f, // left face
+        -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, // base -- left front
+        1.0f, -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f // base -- right back
+    };
+    glGenVertexArrays(numVAOs, vao);
     glBindVertexArray(vao[0]);
     glGenBuffers(numVBOs, vbo);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubePositions), cubePositions, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(pyramidPositions), pyramidPositions, GL_STATIC_DRAW);
 }
 
 GLuint createShaderProgram() {
@@ -65,8 +80,8 @@ GLuint createShaderProgram() {
     GLuint vShader = glCreateShader(GL_VERTEX_SHADER);
     GLuint fShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-    string vertShaderString = Utils::readShaderSource("/Users/randyhartzell/CLionProjects/graphics/CubeInstancingVertShader.glsl");
-    string fragShaderString = Utils::readShaderSource("/Users/randyhartzell/CLionProjects/graphics/CubeInstancingFragShader.glsl");
+    string vertShaderString = Utils::readShaderSource("/Users/randyhartzell/CLionProjects/graphics/MultipleModelsVertShader.glsl");
+    string fragShaderString = Utils::readShaderSource("/Users/randyhartzell/CLionProjects/graphics/MultipleModelsFragShader.glsl");
     const char *vertShaderSrc = vertShaderString.c_str();
     const char *fragShaderSrc = fragShaderString.c_str();
 
@@ -108,10 +123,12 @@ GLuint createShaderProgram() {
 void init(GLFWwindow* window) {
     renderingProgram = createShaderProgram();
     cameraX = 0.0f; cameraY = 0.0f; cameraZ = 25.0f;
-    cubeLocX = 0.0f; cubeLocY = 0.0f; cubeLocZ = 0.0f; // shift down Y to reveal perspective;
+    cubeLocX = 0.0f; cubeLocY = 0.0f; cubeLocZ = 0.0f;
+    pyrLocX = 2.0f; pyrLocY = 2.0f; pyrLocZ = 2.0f;
     setupVertices();
 }
 
+stack<glm::mat4> mvStack;
 void display(GLFWwindow* window, double currentTime) {
     // background
     glClear(GL_DEPTH_BUFFER_BIT);
@@ -120,7 +137,7 @@ void display(GLFWwindow* window, double currentTime) {
 
     // get the uniform variables for the matrices
     projLoc = glGetUniformLocation(renderingProgram, "proj_matrix");
-    vLoc = glGetUniformLocation(renderingProgram, "v_matrix");
+    mvLoc = glGetUniformLocation(renderingProgram, "v_matrix");
 
     // build perspective matrix
     glfwGetFramebufferSize(window, &width, &height);
@@ -130,25 +147,47 @@ void display(GLFWwindow* window, double currentTime) {
 
     // build view matrix
     vMat = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
-    float timeFactor;
-    glUniformMatrix4fv(vLoc, 1, GL_FALSE, glm::value_ptr(vMat));
+    mvStack.push(vMat);
 
-    timeFactor = ((float)currentTime);
-    tfLoc = glGetUniformLocation(renderingProgram, "tf");
-    glUniform1f(tfLoc, (float)timeFactor);
+    // pyramid //
+    mvStack.push(mvStack.top());
+    mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    mvStack.push(mvStack.top());
+    mvStack.top() *= glm::rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(1.0f, 0.0f, 0.0f));
+    glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(0);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glDrawArrays(GL_TRIANGLES, 0, 18);
+    mvStack.pop();
 
-    // copy perspective and MV matrices to corresponding uniform variables
-    glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
-
-    // associate VBO with the corresponding vertex attribute in the vertex shader
+    // cube //
+    mvStack.push(mvStack.top());
+    mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(sin((float)currentTime)*4.0 , 0.0f, cos((float)currentTime)*4.0));
+    mvStack.push(mvStack.top());
+    mvStack.top() *= glm::rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0f, 1.0f, 0.0f));
+    glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
     glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    mvStack.pop();
 
-    // adjust OpenGL settings and draw model
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-    glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 100000);
+    // smaller cube //
+    mvStack.push(mvStack.top());
+    mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.0f , sin((float)currentTime)*2.0, cos((float)currentTime)*2.0));
+    mvStack.top() *= glm::rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0f, 0.0f, 1.0f));
+    mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.25f, 0.25f, 0.25f));
+    glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(0);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    mvStack.pop(); mvStack.pop(); mvStack.pop(); mvStack.pop();
+
 }
 
 int main() {
