@@ -125,7 +125,7 @@ void display(GLFWwindow* window, double currentTime) {
     // build perspective matrix
     glfwGetFramebufferSize(window, &width, &height);
     aspect = (float) width/ (float) height;
-    pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f); // 1.0472 radians = 60 degrees
+    pMat = glm::perspective(1.4472f, aspect, 0.1f, 1000.0f); // 1.0472 radians = 60 degrees
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
 
     // build view matrix

@@ -15,9 +15,9 @@ void main(void)
     float b = sin(301.0 * i/8000) * 401.0f;
     float c = sin(400.0 * i/8000) * 405.0f;
 
-    mat4 localRotX = rotateX(i*.1);
-    mat4 localRotY = rotateX(i*.1);
-    mat4 localRotZ = rotateX(i*.1);
+    mat4 localRotX = rotateX(i*2);
+    mat4 localRotY = rotateX(i*2);
+    mat4 localRotZ = rotateX(i*2);
     mat4 localTrans = buildTranslate(a,b,c);
 
     mat4 newM_matrix = localTrans * localRotX * localRotY * localRotZ;

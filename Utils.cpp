@@ -14,6 +14,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <SOIL2/soil2.h>
 #include "Utils.h"
 
 using namespace utils;
@@ -83,42 +84,9 @@ bool Utils::checkOpenGLError() {
     return foundError;
 }
 
-glm::mat4 buildTranslate(float x, float y, float z) {
-    glm::mat4 trans = glm::mat4(1.0, 0.0, 0.0, 0.0,
-                                0.0, 1.0, 0.0, 0.0,
-                                0.0, 0.0, 1.0, 0.0,
-                                x, y, z, 1.0 );
-    return trans;
-}
-
-glm::mat4 buildScale(float x, float y, float z) {
-    glm::mat4 scale = glm::mat4(x, 0.0, 0.0, 0.0,
-                                0.0, y, 0.0, 0.0,
-                                0.0, 0.0, z, 0.0,
-                                0.0, 0.0, 0.0, 1.0 );
-    return scale;
-}
-
-glm::mat4 rotateX(float rad) {
-    glm::mat4 xrot = glm::mat4(1.0, 0.0, 0.0, 0.0,
-                               0.0, cos(rad), -sin(rad), 0.0,
-                               0.0, sin(rad), cos(rad), 0.0,
-                               0.0, 0.0, 0.0, 1.0 );
-    return xrot;
-}
-
-glm::mat4 rotateY(float rad) {
-    glm::mat4 yrot = glm::mat4(cos(rad), 0.0, sin(rad), 0.0,
-                               0.0, 1.0, 0.0, 0.0,
-                               -sin(rad), 0.0, cos(rad), 0.0,
-                               0.0, 0.0, 0.0, 1.0 );
-    return yrot;
-}
-
-glm::mat4 rotateZ(float rad) {
-    glm::mat4 zrot = glm::mat4(cos(rad), -sin(rad), 0.0, 0.0,
-                               sin(rad), cos(rad), 0.0, 0.0,
-                               0.0, 0.0, 1.0, 0.0,
-                               0.0, 0.0, 0.0, 1.0 );
-    return zrot;
+GLuint Utils::loadTexture(const char *textImagePath) {
+    GLuint textureID;
+    textureID = SOIL_load_OGL_texture(textImagePath, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_INVERT_Y);
+    if (textureID == 0) cout << "could not find texture file" << textImagePath << endl;
+    return textureID;
 }
